@@ -1,0 +1,77 @@
+System Architecture
+The system follows a modular client–server architecture, consisting of:
+•	User Interface: For data entry and system navigation.
+•	Application Logic: Handles operations like book search, stock update, and billing.
+•	Database Layer: Stores book details, sales records, and customer data.
+Flowchart
+       +---------------------+
+        |      Start                |
+       +---------+-----------+
+                  |
+                  v
+        +---------------------+
+        |  Login / Main Menu  |
+        +---------+-----------+
+                  |
+                  v
+     +------------+-------------+
+     | Add / View / Update Book |
+     +------------+-------------+
+                  |
+                  v
+        +---------------------+
+        |   Billing Module    |
+        +---------+-----------+
+                  |
+                  v
+        +---------------------+
+        | Update Stock & Save |
+        +---------+-----------+
+                  |
+                  v
+        +---------------------+
+        |       Exit                 |
+        +---------------------
+
+
+
+
+ 
+
+Class Diagram 
++------------------+
+|   Book               |
++------------------+
+| bookID             |
+| title                   |
+| author               |
+| price                 |
+| quantity            |
++------------------+
+| addBook()        |
+| updateStock()   |
+| searchBook()    |
++------------------+
+
++------------------+
+|   Customer        |
++------------------+
+| custID               |
+| name                 |
+| contact              |
++------------------+
+
++------------------+
+|   Transaction    |
++------------------+
+| transID             |
+| bookID             |
+
+| custID              |
+| date                  |
+| amount             |
++------------------+
+| generateBill()   |
+| updateInventory()|
++------------------+
+
