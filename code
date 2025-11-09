@@ -1,0 +1,198 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+class Book {
+    int bookNo;
+    char bookName[50];
+    char author[50];
+    float price;
+    int copies;
+
+public:
+    void createBook() {
+        cout << "\nEnter Book Number: ";
+        cin >> bookNo;
+        cout << "Enter Book Name: ";
+        cin.ignore();
+        cin.getline(bookName, 50);
+        cout << "Enter Author Name: ";
+        cin.getline(author, 50);
+        cout << "Enter Price: ";
+        cin >> price;
+        cout << "Enter Copies: ";
+        cin >> copies;
+    }
+
+    void showBook() const {
+        cout << "\nBook Number: " << bookNo;
+        cout << "\nBook Name: " << bookName;
+        cout << "\nAuthor: " << author;
+        cout << "\nPrice: " << price;
+        cout << "\nCopies: " << copies << endl;
+    }
+
+    int getBookNo() const {
+        return bookNo;
+    }
+
+    void modifyBook() {
+        cout << "\nModify Book Number: ";
+        cin >> bookNo;
+        cout << "Modify Book Name: ";
+        cin.ignore();
+        cin.getline(bookName, 50);
+        cout << "Modify Author Name: ";
+        cin.getline(author, 50);
+        cout << "Modify Price: ";
+        cin >> price;
+        cout << "Modify Copies: ";
+        cin >> copies;
+    }
+};
+
+void writeBook() {
+    Book bk;
+    ofstream outFile;
+    outFile.open("books.dat", ios::binary | ios::app);
+    bk.createBook();
+    outFile.write(reinterpret_cast<char*>(&bk), sizeof(Book));
+    outFile.close();
+    cout << "\nBook added successfully!\n";
+}
+
+void displayAll() {
+    Book bk;
+    ifstream inFile;
+    inFile.open("books.dat", ios::binary);
+    if (!inFile) {
+        cout << "File could not be opened!" << endl;
+        return;
+    }
+    cout << "\n\nList of all books:\n";
+    while (inFile.read(reinterpret_cast<char*>(&bk), sizeof(Book))) {
+        bk.showBook();
+        cout << "---------------------------";
+    }
+    inFile.close();
+}
+
+void displaySp(int n) {
+    Book bk;
+    ifstream inFile;
+    inFile.open("books.dat", ios::binary);
+    if (!inFile) {
+        cout << "File could not be opened!" << endl;
+        return;
+    }
+    bool found = false;
+    while (inFile.read(reinterpret_cast<char*>(&bk), sizeof(Book))) {
+        if (bk.getBookNo() == n) {
+            bk.showBook();
+            found = true;
+            break;
+        }
+    }
+    inFile.close();
+    if (!found)
+        cout << "\nBook not found.\n";
+}
+
+void modifyBook() {
+    int n;
+    bool found = false;
+    cout << "\nEnter Book Number to modify: ";
+    cin >> n;
+    fstream file;
+    file.open("books.dat", ios::binary | ios::in | ios::out);
+    if (!file) {
+        cout << "File could not be opened!" << endl;
+        return;
+    }
+    Book bk;
+    while (!file.eof() && !found) {
+        streampos pos = file.tellg();
+        if (file.read(reinterpret_cast<char*>(&bk), sizeof(Book))) {
+            if (bk.getBookNo() == n) {
+                cout << "\nCurrent details of book:\n";
+                bk.showBook();
+                cout << "\nEnter new details:\n";
+                bk.modifyBook();
+                file.seekp(pos);
+                file.write(reinterpret_cast<char*>(&bk), sizeof(Book));
+                cout << "\nRecord updated!\n";
+                found = true;
+            }
+        }
+    }
+    file.close();
+    if (!found)
+        cout << "\nBook not found.\n";
+}
+
+void deleteBook() {
+    int n;
+    cout << "\nEnter Book Number to delete: ";
+    cin >> n;
+    ifstream inFile;
+    inFile.open("books.dat", ios::binary);
+    if (!inFile) {
+        cout << "File could not be opened!" << endl;
+        return;
+    }
+    ofstream outFile;
+    outFile.open("temp.dat", ios::binary);
+    Book bk;
+    bool found = false;
+    while (inFile.read(reinterpret_cast<char*>(&bk), sizeof(Book))) {
+        if (bk.getBookNo() != n)
+            outFile.write(reinterpret_cast<char*>(&bk), sizeof(Book));
+        else
+            found = true;
+    }
+    inFile.close();
+    outFile.close();
+
+    remove("books.dat");
+    rename("temp.dat", "books.dat");
+
+    if (found)
+        cout << "\nBook deleted successfully!\n";
+    else
+        cout << "\nBook not found.\n";
+}
+
+int main() {
+    char ch;
+    do {
+        cout << "\n===== Bookshop Management System =====";
+        cout << "\n1. Add Book";
+        cout << "\n2. Display All Books";
+        cout << "\n3. Display Specific Book";
+        cout << "\n4. Modify Book";
+        cout << "\n5. Delete Book";
+        cout << "\n6. Exit";
+        cout << "\nEnter your choice (1-6): ";
+        cin >> ch;
+
+        switch (ch) {
+            case '1': writeBook(); break;
+            case '2': displayAll(); break;
+            case '3': {
+                int num;
+                cout << "Enter book number: ";
+                cin >> num;
+                displaySp(num);
+                break;
+            }
+            case '4': modifyBook(); break;
+            case '5': deleteBook(); break;
+            case '6': cout << "\nExiting program..."; break;
+            default: cout << "\nInvalid choice! Please try again.\n";
+        }
+    } while (ch != '6');
+
+    return 0;
+}
+
